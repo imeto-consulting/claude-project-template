@@ -52,7 +52,9 @@ works end-to-end is a project you can ship agentically without second-guessing. 
    subagent, follow [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md): carry the
    goal in, prove the outcome before marking done. Keep the verification check green.
 4. **Close out.** When every box is `- [x]`, run the [`close-out`](.claude/skills/close-out/SKILL.md)
-   skill: capture evidence, archive the plan to `docs/plans/archive/`, update the roadmaps.
+   skill: capture evidence, archive the plan (and its design spec) to `docs/plans/archive/`, update
+   the roadmaps and the README. Remember: green tests mean the code works, not that anyone can use
+   it yet — if getting it to its users is a separate step, that step is still open work.
 5. **Capture what you learned.** When you land on a pattern or convention worth keeping, ask
    Claude to turn it into a skill (`skill-creator`) or a rule in `.claude/rules/`. Every few
    plans, run [`retro`](.claude/skills/retro/SKILL.md) to catch workflow drift and fix the rules
@@ -66,3 +68,6 @@ works end-to-end is a project you can ship agentically without second-guessing. 
   structure when a real need shows up, not in anticipation.
 - **Evidence over assertion.** "Tests pass" means you ran them and saw the count. Don't claim
   done without proof.
+- **Done means delivered.** Think end-to-end: the goal isn't "the code works," it's "the people
+  it's for can use it." Verification proves the first; delivery (publish/deploy/hand-off) closes
+  the second. A build plan closing out is not the project finishing.
