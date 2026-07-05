@@ -132,9 +132,12 @@ the plan's Verification check and captures the real output. Evidence, not "shoul
 actions get a human nod, matching the mandate. Merge the worktree branch back to `main`.
 
 **7. Close out.** When every box is `- [x]`, run the `close-out` **skill**. It refuses to finish
-without evidence, archives the plan to `docs/plans/archive/`, and updates both roadmaps — removes
-the line from `docs/ROADMAP.md` and appends it to the shipped log at
-`docs/plans/archive/ROADMAP.md`.
+without evidence, archives the plan *and its design spec* to `docs/plans/archive/`, updates both
+roadmaps — removes the line from `docs/ROADMAP.md` and appends it to the shipped log at
+`docs/plans/archive/ROADMAP.md` — and keeps `README.md` honest if the work changed what the
+project does. And it draws the line between *green* and *delivered*: passing tests mean the code
+works, not that the people it's for can use it — if getting it to them is a separate step, that
+step stays on the roadmap as open work.
 
 **8. Improve.** Every few plans, run the `retro` **skill**: it re-reads recently shipped plans
 against the rules, finds where the workflow drifted, and **fixes the rule that should have caught
@@ -185,6 +188,13 @@ into your repo. This template overrides that — plans are *your* decision recor
 
 ## Make it yours
 
-When you land on a pattern worth keeping, ask Claude to turn it into a skill (`skill-creator`) or
-a rule in `.claude/rules/`. The `retro` skill exists to feed this loop. The template gets sharper
-with every project.
+**When you start a real project from this template**, make it yours right away — rewrite the top
+of `CLAUDE.md` to describe *your* project (not "a starter template"), and replace this `README.md`
+with a real README for what you're building. Don't copy this workflow essay into your repo; keep
+the workflow by linking back here instead. A README that still describes the template is the most
+common drift there is.
+
+**As you use it**, when you land on a pattern worth keeping, ask Claude to turn it into a skill
+(`skill-creator`) or a rule in `.claude/rules/`. The `retro` skill exists to feed this loop — and
+to push those improvements *back here*, so the next project inherits them. The template gets
+sharper with every project.

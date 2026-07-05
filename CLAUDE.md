@@ -35,6 +35,20 @@ use. On your first session, if prompted to install `superpowers@claude-plugins-o
 accept. Or run `/plugin install superpowers@claude-plugins-official` yourself. After that it
 stays enabled across sessions.
 
+## Forking this into a real project (once, when you start building)
+
+The moment this stops being "the template" and becomes *your project*, make it yours — don't let
+template boilerplate linger (it will read as stale and mislead you later):
+
+- **Rewrite the top of this file** (line 3) to describe *your* project, not "a starter template."
+- **Replace `README.md`** with a real README for your project — what it does, how to build and
+  run it, its status. Don't copy the template's workflow essay into your repo; keep the workflow
+  by *linking back* to the template repo instead. A README that still describes the template (or
+  an old version of the project) is the single most common drift — `close-out` step 5 guards it,
+  but start it right here.
+- Keep `.claude/` (rules, skills) — that's the workflow you're keeping. As you improve it, push
+  those improvements back to the template so the next project inherits them.
+
 ## The workflow — verification first
 
 The one lesson behind this template: **get verification in early.** A project you can prove
