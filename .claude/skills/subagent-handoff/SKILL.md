@@ -34,6 +34,15 @@ marking it done — don't mark done on the subagent's word alone. Run the comman
 hit the endpoint. Lint and unit tests passing are hygiene; they are not proof the goal is met.
 (See `superpowers:verification-before-completion` and `.claude/rules/plans.md`.)
 
+## Isolate the session in a worktree (default for plan implementation)
+
+Run plan implementation in a **dedicated worktree** (`superpowers:using-git-worktrees`), not the
+primary checkout — always, not only when subagents conflict. A worktree has its own HEAD, so a
+concurrent session sharing the clone can't switch your branch or revert your commit under you.
+**One worktree per session.** Before any commit or push, confirm `git rev-parse --abbrev-ref HEAD`
+is your branch (not `main`), and stage only your own files (`git add <paths>`, never `git add -A`
+in a shared tree — it sweeps another session's uncommitted work into your commit).
+
 ## When dispatching several at once
 
 Parallel subagents must have non-overlapping scope (separate files/dirs) — see

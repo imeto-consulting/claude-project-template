@@ -61,10 +61,15 @@ works end-to-end is a project you can ship agentically without second-guessing. 
    Every plan opens with **Goal**, **Scope**, **Verification** (see the rule). The verification
    must be something *runnable* — a test or a command with expected output — not "looks right."
    Commit the plan immediately, before creating a worktree.
-3. **Implement.** Let Superpowers drive the tasks (`superpowers:using-git-worktrees` for
-   isolation, `superpowers:subagent-driven-development` for parallel work). When you dispatch a
-   subagent, follow [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md): carry the
-   goal in, prove the outcome before marking done. Keep the verification check green.
+3. **Implement — always in a dedicated worktree.** Create one with `superpowers:using-git-worktrees`
+   and do *all* implementation there; never implement a plan on the primary checkout. This is not
+   optional. A worktree has its own HEAD, so a second concurrent session — or a dispatched agent —
+   sharing the clone can't switch your branch or revert your commit out from under you. **One
+   worktree per session; never run two implementation sessions in the same checkout.** Drive tasks
+   with `superpowers:subagent-driven-development`, and for every dispatch follow
+   [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md): carry the goal in, prove the
+   outcome before marking done, and before each commit confirm the worktree is on its own branch
+   (not `main`). Keep the verification check green.
 4. **Close out.** When every box is `- [x]`, run the [`close-out`](.claude/skills/close-out/SKILL.md)
    skill: capture evidence, archive the plan (and its design spec) to `docs/plans/archive/`, update
    the roadmaps and the README. Remember: green tests mean the code works, not that anyone can use
