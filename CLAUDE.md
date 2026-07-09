@@ -23,6 +23,9 @@ This file is loaded into every session and every subagent — it's the shared br
 - **Workflow skills** — [`inventory`](.claude/skills/inventory/SKILL.md) (start a session by
   seeing what's in flight), [`audit-validation`](.claude/skills/audit-validation/SKILL.md)
   (verify claims about the code by grepping before you plan),
+  [`worktree-first`](.claude/skills/worktree-first/SKILL.md) (when a clone is shared by more than
+  one session, the primary checkout stays on `main`; do every commit-producing task in a worktree
+  — never `git checkout` a feature branch in the shared clone),
   [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md) (carry intent into a dispatched
   subagent and prove the outcome before marking it done), and
   [`retro`](.claude/skills/retro/SKILL.md) (periodically check that shipped work honored the
