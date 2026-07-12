@@ -24,7 +24,10 @@ This file is loaded into every session and every subagent — it's the shared br
   seeing what's in flight), [`audit-validation`](.claude/skills/audit-validation/SKILL.md)
   (verify claims about the code by grepping before you plan),
   [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md) (carry intent into a dispatched
-  subagent and prove the outcome before marking it done), and
+  subagent and prove the outcome before marking it done — the controller commits, subagents
+  edit+test only),
+  [`manual-steps`](.claude/skills/manual-steps/SKILL.md) (collect every human-only step into a
+  runbook checklist before calling work delivered, never silently drop one), and
   [`retro`](.claude/skills/retro/SKILL.md) (periodically check that shipped work honored the
   rules, and fix the rules that didn't fire).
 
@@ -75,7 +78,11 @@ works end-to-end is a project you can ship agentically without second-guessing. 
    the roadmaps and the README. Remember: green tests mean the code works, not that anyone can use
    it yet — if getting it to its users is a separate step, that step is still open work.
 5. **Capture what you learned.** When you land on a pattern or convention worth keeping, ask
-   Claude to turn it into a skill (`skill-creator`) or a rule in `.claude/rules/`. Every few
+   Claude to turn it into a skill (`skill-creator`) or a rule in `.claude/rules/`. A
+   design-driving *fact about your environment* (a setting, a confirmed absence, a verified
+   permission) goes in a description-matched skill or a `docs/runbooks/` entry, never only in a
+   plan that will archive — see [`.claude/rules/knowledge-capture.md`](.claude/rules/knowledge-capture.md),
+   which also says to consult skills/runbooks before re-asking the human a settled fact. Every few
    plans, run [`retro`](.claude/skills/retro/SKILL.md) to catch workflow drift and fix the rules
    that didn't fire. The template gets smarter with each project.
 
@@ -89,4 +96,7 @@ works end-to-end is a project you can ship agentically without second-guessing. 
   done without proof.
 - **Done means delivered.** Think end-to-end: the goal isn't "the code works," it's "the people
   it's for can use it." Verification proves the first; delivery (publish/deploy/hand-off) closes
-  the second. A build plan closing out is not the project finishing.
+  the second. A build plan closing out is not the project finishing. When delivery depends on a
+  step only a human can perform (an OAuth consent, a secret value, a cloud role, a DNS record, a
+  cross-repo PR), surface it as an explicit checklist and track it to done — never silently drop
+  it. See [`manual-steps`](.claude/skills/manual-steps/SKILL.md).
