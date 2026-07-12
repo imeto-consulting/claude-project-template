@@ -43,6 +43,36 @@ concurrent session sharing the clone can't switch your branch or revert your com
 is your branch (not `main`), and stage only your own files (`git add <paths>`, never `git add -A`
 in a shared tree — it sweeps another session's uncommitted work into your commit).
 
+## Subagents share the primary checkout's `.git` — so the controller commits, not the subagent
+
+A git worktree shares one `.git` with the primary checkout, and a **dispatched subagent's `cd` does
+not persist across its Bash calls** — each tool call runs in a fresh shell whose cwd is the
+*primary* working directory. So `cd <worktree>` in one call is gone by the `git commit` in a later
+call, and the commit lands on the **primary checkout's branch (`main`)** — not the worktree branch
+— even when the subagent reports "confirmed branch is `<feature>`" (that check ran in yet another
+fresh shell). A subagent that also runs `git push` puts the stray commit on shared `origin/main`,
+bypassing review. This recurs even with `cd`-based guards written into the brief: policing subagent
+git per-call does not hold under pressure.
+
+**Default: the controller commits; subagents don't touch git.** For plan implementation, have the
+subagent **edit files and run tests only**, and report back the changed file paths plus the test
+command and its output. The **controller** — which is durably anchored in the worktree (its cwd
+persists across your own calls) — does every `git add <paths>` / `commit` / `push`. This removes the
+shared-`.git` hazard entirely rather than relying on per-call discipline in every subagent, and
+keeps staging explicit (`git add <paths>`, never `git add -A` in a shared tree).
+
+**Recovery if a stray commit lands:** `git cherry-pick` it onto the worktree branch, then restore
+the strayed branch — `git revert` (safe, non-destructive) if it was already pushed to shared
+`origin/main`, or `git reset --hard origin/main` on a purely-local stray.
+
+**Fallback — only if a subagent genuinely must run git** (e.g. a long autonomous multi-commit task):
+(1) the brief tells it to run *all* git ops as `git -C <absolute-worktree-path> …` (add/commit/branch
+— never a bare `cd && git`), since `-C` is per-invocation and immune to the non-persisting cwd; and
+(2) the controller still verifies each task's commit actually landed on the worktree branch before
+marking it done — `git -C <worktree> log` shows the new HEAD, and the branch grows by exactly the
+task's commits. The final review-package (`git merge-base main HEAD`..HEAD) surfaces a stray as a
+*missing* commit.
+
 ## When dispatching several at once
 
 Parallel subagents must have non-overlapping scope (separate files/dirs) — see
