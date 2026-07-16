@@ -48,6 +48,11 @@ A spec still in `docs/plans/` after its implementation has fully shipped is drif
      endpoint), the check exercises *that*, not only unit tests underneath it. Unit-green while the
      built product is broken (wrong name on screen, a button that does nothing) is the classic gap
      manual testing catches too late.
+   - **Match your CI gate exactly.** If your project has a CI gate, the check you run locally before
+     claiming done must be the *same* command the gate runs — all of it, not a subset. If CI runs a
+     linter *and* the tests (and a type check), running the tests alone can pass locally and still
+     redden CI. "Lint-only ≠ verified" has a twin: test-only ≠ verified either, when the gate also
+     lints. Name the exact command, and make the local run and the gate run one and the same.
 
 ## Failure modes / RCA — when the plan follows a failure
 

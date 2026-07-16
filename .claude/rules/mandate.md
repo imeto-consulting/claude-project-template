@@ -12,6 +12,10 @@ Decide and execute without asking. Examples:
 - Anything reversible by a single `git revert`, where the reasoning is mechanical (a grep
   result, a file's existence, a test exit code).
 - Reading the code to answer a question instead of asking the user what's in it.
+- **Deriving a fact/id/value you have the means to find — instead of asking for it.** If it's
+  discoverable (a grep, a file's existence, a runbook/skill, a link already in the thread), go find
+  it. Asking the human for a value you could look up is over-asking; consult the skills/runbooks
+  first (see `.claude/rules/knowledge-capture.md`), and only ask if the lookup comes up empty.
 
 ## Tier 2 — propose, then do it (don't wait for a yes)
 

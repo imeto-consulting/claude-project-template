@@ -30,3 +30,21 @@ signal you skipped the lookup, not that the fact needs re-confirming.
   check the relevant skill/runbook first. Only ask if the lookup comes up empty.
 - Writing a plan that depends on an environment fact you just confirmed? Cite the skill/runbook,
   don't just restate the fact in the plan — the plan archives, the skill doesn't.
+
+## Never re-ask for something already provisioned
+
+The same discipline extends from *facts* to *provisioning* — a value, permission, scope, role, or
+resource share that has already been set or granted. Re-asking the human to set or grant something
+that's already in place is itself a human-in-the-loop failure — the mirror image of re-asking a
+settled fact.
+
+- **A live deployment implies its grants exist.** If a service is running in an environment, its
+  required secrets, roles, and resource shares are — by definition — already provisioned there.
+  Don't ask the human to "make sure X is granted" for something that is demonstrably working;
+  record it as verified instead (below).
+- **Keep a permission ledger** — a durable "what's already set / granted, never re-ask" index (e.g.
+  `docs/runbooks/permission-ledger.md`, added the first time you confirm a grant, the way any
+  runbook is created on first need). It is the companion to the `manual-steps` skill: manual-steps
+  tracks what's *still outstanding*; the ledger records what's *done*. Consult it before asking the
+  human to set or grant anything — if the item is recorded there, assume it's in place and proceed;
+  only ask if the ledger has no entry for it.
