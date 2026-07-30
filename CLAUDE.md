@@ -89,6 +89,32 @@ works end-to-end is a project you can ship agentically without second-guessing. 
    plans, run [`retro`](.claude/skills/retro/SKILL.md) to catch workflow drift and fix the rules
    that didn't fire. The template gets smarter with each project.
 
+## The always-on context budget
+
+`CLAUDE.md`, the non-path-scoped `.claude/rules/*.md`, and every skill's `description`/`when_to_use`
+are loaded **before any work starts, in every session and every dispatched subagent**. Nothing
+measures that by default, so it grows by accretion — every retro adds a rule and none removes one.
+
+```bash
+python3 scripts/check_context_budget.py     # prints the table, enforces the ceiling
+```
+
+Stdlib only; wire it into whatever gate this project has. **When it fails, cut on facts vs
+behavioural rules:**
+
+- **Facts stay.** An id, a path, a gotcha, the gate command — anything the model cannot derive.
+  A weaker model tier needs these *more*, not less.
+- **Behavioural scaffolding goes.** Exhortations to verify, to not over-ask, to report faithfully.
+  Current-generation models do these unprompted, and the instructions now cost tokens without
+  improving quality ([Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)).
+- **Prove each deletion:** stub the line out, run the case it was written for, keep it deleted only
+  if behaviour holds. ⚠️ Restore from a **copy** (`cp x x.bak`), never `git checkout <file>` — that
+  discards all unstaged work on the file.
+
+[`retro`](.claude/skills/retro/SKILL.md) owns the recurring prune; without it the budget re-inflates.
+Writing instructions more than one model reads:
+[`cross-model-prompting`](.claude/skills/cross-model-prompting/SKILL.md).
+
 ## Conventions
 
 - **Plans & specs:** `docs/plans/` — see [`.claude/rules/plans.md`](.claude/rules/plans.md). This
