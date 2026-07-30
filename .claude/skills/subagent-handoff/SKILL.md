@@ -10,6 +10,34 @@ A reliability layer over `superpowers:subagent-driven-development` (and
 every dispatch. The failure mode this prevents: a subagent reports "done", the dispatcher marks
 it done on faith, and nobody checked the actual user-observable result.
 
+## 0. Decide whether to delegate at all — then which tier, and say why
+
+**Delegation multiplies cost and time.** Each subagent re-establishes context, re-explores, and
+reports back, and then you re-read the report. Delegate only when the payoff clearly exceeds that.
+
+- **Do** delegate a large, genuinely independent, parallelizable track.
+- **Do not** delegate work you could finish in a handful of tool calls, and **do not use a subagent
+  to verify your own work** — verification belongs in your main loop.
+- One subagent beats several for one task. Keep spawn counts low.
+
+⚠️ Newer Claude models delegate *more* readily than their predecessors, so guidance written to
+encourage delegation is likely now inverted — replace it with a cap. (Anthropic's
+[Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5).)
+
+**Then name the tier in the brief, and match the brief's constraint level to it** — see
+[`cross-model-prompting`](../cross-model-prompting/SKILL.md):
+
+| Tier | Brief shape |
+|---|---|
+| Current-generation frontier models | Goal + acceptance test. Skip step-by-step scaffolding — over-constraining them measurably *reduces* output quality. |
+| Smaller or older-generation models | Explicit checklist, worked example, stated output shape. |
+
+**Facts are identical for every tier** — the environment facts a brief carries help a weaker model
+*more*, not less. Only the scaffolding varies. Say which tier you chose and why in one clause.
+
+> **Cost note:** a subagent with preloaded skills gets the **full skill body injected at startup**,
+> not just the description — an oversized `SKILL.md` is paid per subagent, not once.
+
 ## 1. Carry intent IN — every prompt opens with the goal
 
 Start each subagent prompt with a **Goal** section, copied verbatim from the plan's Goal (the

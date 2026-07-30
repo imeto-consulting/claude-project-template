@@ -42,6 +42,27 @@ Read the execution's commits and messages:
 
 Every "want me to…?" for something the mandate calls Tier 1 is a finding.
 
+### Context-budget drift — and the prune
+
+**A retro that only ADDS is incomplete.** The natural failure mode is a ratchet: every retro adds a
+rule and none ever removes one, so `CLAUDE.md` and the skill listings grow without limit — and they
+are paid in every session *and every dispatched subagent*.
+
+```bash
+python3 scripts/check_context_budget.py
+```
+
+1. **Report the delta** since the last retro — total, and which artifact moved.
+2. **Act on every warning**: a skill listing near the 1,536-char cap (past it, the tail is invisible
+   to routing), a body over 400 lines (a loaded skill stays in context across turns, and compaction
+   keeps only its first ~5,000 tokens).
+3. **Prune at least one rule per pass.** Candidates are *behavioural scaffolding* — an exhortation to
+   verify, to not over-ask, to report faithfully. **Never a fact** (an id, a path, a gotcha, a gate
+   command): facts help a weaker model tier *more*, not less. Prove it by stubbing the line out and
+   running the case it was written for.
+4. **If the budget grew**, say so plainly and name what to cut next time. A ceiling raised to
+   accommodate accretion is the failure the ceiling exists to prevent.
+
 ### 4. Output + fix
 
 If clean: `Retro <date> — N plans reviewed: clean.`
