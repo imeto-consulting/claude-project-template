@@ -1,0 +1,26 @@
+# The gate this template ships with. It runs the one check the template itself can fail:
+# the always-on context budget (CLAUDE.md + non-path-scoped rules + skill listings).
+#
+# When you fork this into a real project, ADD YOUR OWN CHECKS TO THIS JOB — your test suite,
+# your linter — so the budget check rides the same gate as everything else rather than being a
+# thing someone has to remember to run.
+name: gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # No setup-python step on purpose: check_context_budget.py is stdlib-only, and the
+      # runner's system python3 is enough. Keep it that way — a gate that needs a toolchain
+      # is a gate that rots.
+      - name: Always-on context budget
+        run: python3 scripts/check_context_budget.py
