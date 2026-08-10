@@ -123,6 +123,13 @@ Writing instructions more than one model reads:
   structure when a real need shows up, not in anticipation.
 - **Evidence over assertion.** "Tests pass" means you ran them and saw the count. Don't claim
   done without proof.
+- **A NEW test is not evidence until you have seen it RED without the fix.** Stub the fix out, watch
+  it fail, restore, watch it pass. ⚠️ Restore from a **copy** (`cp x x.bak` → break → test →
+  `cp x.bak x`) — `git checkout <file>` discards *all* unstaged work on that file, which has wiped a
+  finished implementation. Two failures this is the only thing that catches: a test that **never
+  reaches the path it names** passes the broken implementation too *and reads as coverage*; and a
+  **guard** needs its detector proven as well — mutate the thing it guards against and confirm the
+  guard fires.
 - **Done means delivered.** Think end-to-end: the goal isn't "the code works," it's "the people
   it's for can use it." Verification proves the first; delivery (publish/deploy/hand-off) closes
   the second. A build plan closing out is not the project finishing. When delivery depends on a

@@ -25,12 +25,55 @@ the mitigation. Mechanics of worktrees: `superpowers:using-git-worktrees`.
 ```
 git worktree add .claude/worktrees/<name> -b <branch> main   # isolated HEAD, based on main
 cd .claude/worktrees/<name>                                  # do ALL the work here
-#   … edit, commit, push, open PR …
-git worktree remove .claude/worktrees/<name>                 # once pushed / merged
+#   … edit, commit, push, open PR, merge on green …
+git -C <primary-clone> worktree remove .claude/worktrees/<name>   # once the PR reads MERGED
+git -C <primary-clone> worktree prune                             # never --force
 ```
 
 File tools too: operate on the **worktree** path. Absolute paths into the main checkout edit the
 wrong tree even while your shell is in the worktree.
+
+## Removing it — on MERGED, by you, from the primary checkout
+
+Each of the three properties has a failure behind it:
+
+- **`PR == MERGED` is the key.** Proof the content reached `main`. *Pushed* is not the same thing —
+  a pushed-but-unmerged branch still has work to land.
+- **Run it from the primary checkout** (`git -C <primary> …`), never from inside the tree you are
+  removing: a session standing in a directory that vanishes loses its footing. Harnesses also tend
+  to revert the shell CWD to the primary between tool calls, so `git -C` is the natural form anyway.
+- **Plain `remove`, never `--force`.** It refuses on a dirty tree, and that refusal is the guard —
+  if it fires, something in there is still live. Stop and look; don't override.
+
+**Remove your own tree as soon as your PR merges — don't defer it to a periodic cleanup.** Measured
+in a downstream project that deferred it: **78 worktrees = 45 GB**, ~580 MB each, since every
+worktree is a full checkout with its own virtualenv. A cleanup handed to a later session's goodwill
+is a cleanup that does not happen. A periodic sweep is still worth having, but as a *backstop* for
+trees whose session ended without merging — not as the primary path.
+
+Only your **own** worktree, only after **your** merge: someone else's merged tree may still host a
+live session doing follow-up work.
+
+**Never surface any of this to the user** — creation, removal, or the reasoning — in any message. A
+"the worktree stays on disk for the next sweep" line is noise, not transparency; it also invites a
+question about bookkeeping that you then have to answer.
+
+### Don't "improve" the MERGED key into a commit-graph test
+
+If the repo **squash-merges**, both obvious graph tests break, in opposite directions:
+
+| Key | Verdict |
+| --- | --- |
+| `git merge-base --is-ancestor <branch> main` | **Wrong.** A squashed branch's commits are never ancestors of `main` — reports merged work as unmerged-and-reapable, inverted. |
+| `git log main..<branch>` empty (`ahead == 0`) | **Wrong, oppositely.** Squashing leaves the pre-squash commits "ahead" forever, so merged work reads as unmerged. |
+| `git log @{u}..HEAD` empty | **Wrong and dangerous.** A branch with no upstream makes the command error; `wc -l` then prints `0`, so "nothing stranded" is indistinguishable from a failed check. |
+| **PR state `MERGED` + clean tree** | **Correct.** The forge's merge state is the authoritative evidence the content landed. |
+
+Two mechanical traps when scripting a sweep: a **branch name is not its directory name** (map them
+by parsing `git worktree list --porcelain`, since `git -C ""` silently runs against the primary
+checkout instead of failing), and **exclude the tree you are standing in** — a fresh worktree is
+clean and 0-ahead until its first commit, so any content-based gate reaps it out from under the
+running session.
 
 ## Red flags — STOP
 
