@@ -99,8 +99,10 @@ measures that by default, so it grows by accretion — every retro adds a rule a
 python3 scripts/check_context_budget.py     # prints the table, enforces the ceiling
 ```
 
-Stdlib only; wire it into whatever gate this project has. **When it fails, cut on facts vs
-behavioural rules:**
+Stdlib only, and already wired into this repo's own gate
+([`.github/workflows/gate.yml`](.github/workflows/gate.yml), which runs on every PR). When you fork,
+**add your project's tests and linter to that same job** rather than leaving the budget check as
+something someone has to remember to run. **When it fails, cut on facts vs behavioural rules:**
 
 - **Facts stay.** An id, a path, a gotcha, the gate command — anything the model cannot derive.
   A weaker model tier needs these *more*, not less.
