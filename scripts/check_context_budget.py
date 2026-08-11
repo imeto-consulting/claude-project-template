@@ -7,7 +7,9 @@ Three artifacts are paid before any work starts:
 * `.claude/rules/*.md` **without** `paths:` frontmatter. A path-scoped rule (`plans.md`) loads only
   inside its directory, so it is deliberately NOT counted.
 * Each skill's `description:` + `when_to_use:` — the *listing*. A skill's body is paid only when the
-  skill fires, so the body is warned about but never counted toward the budget.
+  skill fires, so the body is warned about but never counted toward the budget. That body warning is
+  denominated in TOKENS (the unit the compaction window uses), not lines — see
+  `COMPACTION_WINDOW_TOKENS` for the measurement that forced the change.
 
 Run it directly for the table; `tests/test_context_budget.py` runs it as the gate.
 
@@ -46,14 +48,35 @@ LISTING_CAP_CHARS = 1_536
 LISTING_WARN_CHARS = 1_400
 
 # A loaded skill's body stays in context across turns, and auto-compaction re-attaches only the
-# first ~5,000 tokens of each skill. Past this, split into SKILL.md + reference/ (see slack-block-kit).
-BODY_WARN_LINES = 400
+# first ~5,000 tokens of each skill. Past this, split into SKILL.md + reference/.
+#
+# Denominated in TOKENS, not lines — the unit the compaction window itself uses. A 400-line trigger
+# was the original proxy here and it under-reported badly: at ~72 chars/line it only fires around
+# ~7,200 tokens, i.e. 44% PAST the limit it cites. Measured downstream on 2026-08-07, that proxy was
+# silent on TWELVE skills already over the window while flagging one. Line density varies ~3x
+# between a prose skill and a code-sample-heavy one, so no line count can stand in for this.
+COMPACTION_WINDOW_TOKENS = 5_000
+BODY_WARN_TOKENS = 4_500          # approaching the window: leave room to edit before it crosses
 
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 
 
 def _tokens(chars: int) -> int:
     return chars // 4
+
+
+def _lines_past(text: str, budget_tokens: int) -> int:
+    """How many trailing lines fall beyond `budget_tokens`, walking the body in order.
+
+    This is what makes the warning actionable: "497 lines" tells you nothing about WHICH content is
+    at risk, but "the last 229 lines" points straight at the sections to move into `reference/`.
+    Same bytes/4 proxy as everything else here."""
+    consumed = 0
+    for i, line in enumerate(text.splitlines(keepends=True)):
+        consumed += len(line)
+        if _tokens(consumed) > budget_tokens:
+            return len(text.splitlines()) - i
+    return 0
 
 
 def _frontmatter(text: str) -> str:
@@ -120,12 +143,17 @@ def measure(repo: pathlib.Path) -> Report:
         elif listing > LISTING_WARN_CHARS:
             report.warnings.append(
                 f"{name}: listing is {listing} chars, near the {LISTING_CAP_CHARS}-char cap")
-        body_lines = len(text.splitlines())
-        if body_lines > BODY_WARN_LINES:
+        body_tokens, body_lines = _tokens(len(text)), len(text.splitlines())
+        if body_tokens > COMPACTION_WINDOW_TOKENS:
             report.warnings.append(
-                f"{name}: body is {body_lines} lines — a loaded skill stays in context across "
-                "turns and compaction keeps only its first ~5,000 tokens; split into "
-                "SKILL.md + reference/")
+                f"{name}: body is ~{body_tokens:,} tokens ({body_lines} lines) — PAST the "
+                f"~{COMPACTION_WINDOW_TOKENS:,}-token compaction window, so roughly its last "
+                f"{_lines_past(text, COMPACTION_WINDOW_TOKENS)} lines stop being re-attached "
+                "after a compaction; split into SKILL.md + reference/")
+        elif body_tokens > BODY_WARN_TOKENS:
+            report.warnings.append(
+                f"{name}: body is ~{body_tokens:,} tokens ({body_lines} lines), approaching the "
+                f"~{COMPACTION_WINDOW_TOKENS:,}-token compaction window")
     if listing_chars:
         report.rows.append(("skill listings (description + when_to_use)", listing_chars))
 
