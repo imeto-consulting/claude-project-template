@@ -30,7 +30,10 @@ This file is loaded into every session and every subagent — it's the shared br
   subagent and prove the outcome before marking it done — the controller commits, subagents
   edit+test only),
   [`manual-steps`](.claude/skills/manual-steps/SKILL.md) (collect every human-only step into a
-  runbook checklist before calling work delivered, never silently drop one), and
+  runbook checklist before calling work delivered, never silently drop one),
+  [`handoff-style`](.claude/skills/handoff-style/SKILL.md) (how that runbook, an issue, a PR
+  description or a README actually reads — the eight Simplified Technical English rules, and the
+  skeletons that make them checkable), and
   [`retro`](.claude/skills/retro/SKILL.md) (periodically check that shipped work honored the
   rules, and fix the rules that didn't fire).
 
@@ -112,6 +115,11 @@ something someone has to remember to run. **When it fails, cut on facts vs behav
 - **Prove each deletion:** stub the line out, run the case it was written for, keep it deleted only
   if behaviour holds. ⚠️ Restore from a **copy** (`cp x x.bak`), never `git checkout <file>` — that
   discards all unstaged work on the file.
+
+The same script also warns per skill **body**, which the budget never counts: a loaded skill stays in
+context across turns, and auto-compaction re-attaches only its first ~5,000 tokens. Past that, its
+tail is silently unreachable — a fact written there is indistinguishable, later, from never written.
+The warning names how many trailing lines to move into `reference/`.
 
 [`retro`](.claude/skills/retro/SKILL.md) owns the recurring prune; without it the budget re-inflates.
 Writing instructions more than one model reads:
