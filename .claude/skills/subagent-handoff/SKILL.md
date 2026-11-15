@@ -38,6 +38,42 @@ encourage delegation is likely now inverted — replace it with a cap. (Anthropi
 > **Cost note:** a subagent with preloaded skills gets the **full skill body injected at startup**,
 > not just the description — an oversized `SKILL.md` is paid per subagent, not once.
 
+## Keep each agent's context small — that is where the tokens go
+
+Every turn re-reads the agent's whole context from the prompt cache. So a turn costs in proportion
+to the context, not to the work done in it. An agent that builds a whole plan grows to hundreds of
+thousands of tokens and pays for all of them on every turn.
+
+1. **One fresh agent per task.** `superpowers:subagent-driven-development` already does this. Keep
+   it that way, also for background builds. Never give a whole plan to one long-running agent.
+   Split a task that is likely to run past ~150 turns.
+2. **A fix round gets a fresh agent.** Brief it with the findings as a list (file:line, what is
+   wrong, what is expected). Do not resume the finished agent. A resumed agent carries its whole
+   context, and its cache has probably expired.
+3. **Give subagents the 1-hour cache.** Subagents default to a 5-minute cache. After a longer
+   pause (a test run, a CI wait), the next turn writes the whole context to the cache again.
+   [`.claude/settings.json`](../../settings.json) sets `"subagentPromptCacheTtl": "1h"`. Claude
+   Code 2.1.242 and later reads it. Settings load at session start.
+4. **No `sleep` or poll loops.** Run a long command with `run_in_background` and act on its
+   completion notice. Wait for CI with one background `gh run watch`.
+5. **Choose the model per role.** Set it with `model:` in the frontmatter of
+   `.claude/agents/<name>.md`. The [`implementer`](../../agents/implementer.md) agent runs on
+   Sonnet. Plans and reviews stay on the strongest model. An agent without `model:` inherits the
+   caller's model, so pin your reviewer too. After two failed attempts on one task, dispatch the
+   next agent with a stronger model.
+6. **Brief by reference.** Give the plan path and the task number. Do not paste the plan. The
+   agent reads only the part it needs.
+
+Check it with `python3 scripts/token_usage.py`. It shows the share of subagent spend, the largest
+agents with their peak context, and the cache misses grouped by what the agent waited for.
+
+> **Measured downstream (two weeks, 200+ subagents).** One agent per plan ran 200–800 turns and
+> peaked at 400–960k tokens of context. Those builders were 69% of all spend. Expired 5-minute
+> caches were another 22%, mostly from `sleep` loops, resumed agents and CI waits. After the change,
+> one plan took seven fresh Sonnet implementers. Their context peaked at 75–157k tokens. The build
+> cost about a sixth of the earlier median build. Review findings were no worse than before, and no
+> task needed the stronger model.
+
 ## 1. Carry intent IN — every prompt opens with the goal
 
 Start each subagent prompt with a **Goal** section, copied verbatim from the plan's Goal (the

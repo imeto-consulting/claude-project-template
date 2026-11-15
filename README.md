@@ -119,7 +119,9 @@ branches from `main` as it is now, so an uncommitted plan won't be inside it.
 (**plugin**) run one **subagent** per task. Wrap every dispatch in the `subagent-handoff`
 **skill**: the subagent's prompt opens with the goal, it must report *what it did / how it
 verified the goal / what it assumed*, and you verify the user-observable result before marking the
-task done. `test-driven-development` and `systematic-debugging` (**plugin**) guide the coding and
+task done. Each task gets a fresh `implementer` **agent** on Sonnet: a long-lived agent pays for its
+whole, growing context on every turn, and that is where most tokens go (see `subagent-handoff`).
+`test-driven-development` and `systematic-debugging` (**plugin**) guide the coding and
 any bug-hunting. The `mandate.md` **rule** keeps the agent moving — it does reversible, mechanical
 work outright and only stops to ask for genuinely strategic or outward-facing calls.
 
@@ -174,7 +176,9 @@ skill. This is how the template gets sharper with every project.
 | `docs/ROADMAP.md`            | Now / Next / Later — what you're working on               |
 | `docs/plans/`                | Specs and active implementation plans                     |
 | `docs/plans/archive/`        | Finished plans + the shipped log (`ROADMAP.md`)           |
-| `.claude/settings.json`      | Enabled plugins and permissions                            |
+| `.claude/settings.json`      | Enabled plugins, permissions, the 1-hour subagent cache    |
+| `.claude/agents/`            | `implementer`: the per-task build agent, on Sonnet         |
+| `scripts/token_usage.py`     | Token spend from your local session transcripts            |
 | `.claude/rules/plans.md`     | How plans are written (loads when you work in `docs/plans/`) |
 | `.claude/rules/mandate.md`   | When the agent acts on its own vs. asks you                |
 | `.claude/skills/`            | `close-out`, `inventory`, `audit-validation`, `subagent-handoff`, `retro` |

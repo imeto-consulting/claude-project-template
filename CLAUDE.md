@@ -28,7 +28,9 @@ This file is loaded into every session and every subagent — it's the shared br
   — never `git checkout` a feature branch in the shared clone),
   [`subagent-handoff`](.claude/skills/subagent-handoff/SKILL.md) (carry intent into a dispatched
   subagent and prove the outcome before marking it done — the controller commits, subagents
-  edit+test only),
+  edit+test only; keep token cost down with a fresh agent per task, the Sonnet
+  [`implementer`](.claude/agents/implementer.md) agent and the 1-hour subagent cache, measured by
+  `scripts/token_usage.py`),
   [`manual-steps`](.claude/skills/manual-steps/SKILL.md) (collect every human-only step into a
   runbook checklist before calling work delivered, never silently drop one),
   [`handoff-style`](.claude/skills/handoff-style/SKILL.md) (how that runbook, an issue, a PR

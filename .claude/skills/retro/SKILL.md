@@ -63,6 +63,15 @@ python3 scripts/check_context_budget.py
 4. **If the budget grew**, say so plainly and name what to cut next time. A ceiling raised to
    accommodate accretion is the failure the ceiling exists to prevent.
 
+### Token-use drift
+
+```bash
+python3 scripts/token_usage.py --since <date of the last retro>
+```
+
+Each of these is a finding against `subagent-handoff`: an agent past ~150 turns or ~300k tokens of
+peak context, cache misses grouped under one wait, or 5-minute subagent cache writes.
+
 ### 4. Output + fix
 
 If clean: `Retro <date> — N plans reviewed: clean.`
